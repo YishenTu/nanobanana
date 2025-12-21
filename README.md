@@ -4,19 +4,19 @@
 
 CLI tool for generating and editing images using Google's Gemini 3 Pro image generation model.
 
-## Setup
+## Installation
 
-1. Install dependencies:
 ```bash
-uv sync
+pip install nbp-cli
 ```
 
-2. Get your API key from [Google AI Studio](https://aistudio.google.com/apikey)
+Then set your API key (get one from [Google AI Studio](https://aistudio.google.com/apikey)):
 
-3. Create a `.env` file:
 ```bash
-GEMINI_API_KEY=your-api-key-here
+export GEMINI_API_KEY=your-api-key-here
 ```
+
+Add the export to your `~/.zshrc` or `~/.bashrc` to persist it.
 
 ## Usage
 
@@ -44,17 +44,14 @@ nbp "visualize today's weather in Tokyo" -s
 | `-e, --edit` | Edit an existing image (provide input path) | - |
 | `-s, --search` | Use Google Search grounding (prompt should ask to "visualize") | - |
 
-## Global Installation
-
-Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
+## Development
 
 ```bash
-alias nbp='uv run --project /path/to/project nbp'
-```
-
-Then use from anywhere:
-```bash
-nbp "your prompt here"
+git clone https://github.com/YishenTu/nbp-cli.git
+cd nbp-cli
+uv sync
+cp .env.example .env  # Add your GEMINI_API_KEY
+uv run nbp "test prompt"
 ```
 
 ## Claude Code Skill
