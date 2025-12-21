@@ -56,3 +56,13 @@ Then use from anywhere:
 ```bash
 nbp "your prompt here"
 ```
+
+## Claude Code Skill
+
+To use NBP as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills), copy the skill to your skills directory:
+
+```bash
+cp -r skills/nanobanana-pro ~/.claude/skills/
+```
+
+Claude will automatically use this skill when you ask it to generate or edit images.
