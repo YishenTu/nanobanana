@@ -5,8 +5,8 @@ import argparse
 import os
 import sys
 from datetime import datetime
-
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load .env from project directory
@@ -14,35 +14,20 @@ load_dotenv(Path(__file__).parent / ".env")
 
 from google import genai
 from google.genai import types
+from PIL import Image
 
 
-def generate_image(
-    prompt: str,
-    output: str | None = None,
-    aspect_ratio: str = "1:1",
-    size: str = "1K",
-) -> str:
-    """Generate an image using Gemini and save it."""
+def get_client() -> genai.Client:
+    """Get authenticated Gemini client."""
     if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("GOOGLE_API_KEY"):
         print("Error: GEMINI_API_KEY environment variable not set.", file=sys.stderr)
         print("Get your API key at: https://aistudio.google.com/apikey", file=sys.stderr)
         sys.exit(1)
+    return genai.Client()
 
-    client = genai.Client()
 
-    response = client.models.generate_content(
-        model="gemini-3-pro-image-preview",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(
-                aspect_ratio=aspect_ratio,
-                image_size=size,
-            ),
-        ),
-    )
-
-    # Find the image part in the response
+def save_image(response, output: str | None) -> str:
+    """Extract and save image from response."""
     for part in response.candidates[0].content.parts:
         if part.inline_data is not None:
             if output:
@@ -60,39 +45,114 @@ def generate_image(
     sys.exit(1)
 
 
+def generate_image(
+    prompt: str,
+    output: str | None = None,
+    aspect_ratio: str = "1:1",
+    size: str = "1K",
+) -> str:
+    """Generate an image using Gemini and save it."""
+    client = get_client()
+
+    response = client.models.generate_content(
+        model="gemini-3-pro-image-preview",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(
+                aspect_ratio=aspect_ratio,
+                image_size=size,
+            ),
+        ),
+    )
+
+    return save_image(response, output)
+
+
+def edit_image(
+    input_path: str,
+    prompt: str,
+    output: str | None = None,
+    size: str = "1K",
+) -> str:
+    """Edit an existing image using Gemini."""
+    client = get_client()
+
+    # Load the input image
+    input_image = Image.open(input_path)
+
+    response = client.models.generate_content(
+        model="gemini-3-pro-image-preview",
+        contents=[input_image, prompt],
+        config=types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(
+                image_size=size,
+            ),
+        ),
+    )
+
+    return save_image(response, output)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="nbp",
-        description="Nano Banana Pro - Generate images with Gemini",
+        description="Nano Banana Pro - Generate and edit images with Gemini 3 Pro",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  nbp "a cat wearing a hat"                  Generate new image
+  nbp "sunset over mountains" -a 16:9        Widescreen landscape
+  nbp "portrait photo" -s 4K -o portrait.png High-res with custom output
+  nbp "add sunglasses" -e photo.png          Edit existing image
+        """,
     )
     parser.add_argument(
         "prompt",
-        help="Text description of the image to generate",
+        help="Text prompt for generation or edit instruction",
+    )
+    parser.add_argument(
+        "-e", "--edit",
+        metavar="FILE",
+        help="Edit existing image instead of generating new",
     )
     parser.add_argument(
         "-o", "--output",
-        help="Output file path (default: nbp_TIMESTAMP.png)",
+        metavar="FILE",
+        help="Output path (default: nbp_TIMESTAMP.png)",
     )
     parser.add_argument(
         "-a", "--aspect-ratio",
         default="1:1",
+        metavar="RATIO",
         choices=["1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "9:21"],
-        help="Aspect ratio (default: 1:1)",
+        help="Aspect ratio: 1:1, 16:9, 9:16, 4:3, 3:4 (default: 1:1)",
     )
     parser.add_argument(
         "-s", "--size",
         default="1K",
+        metavar="SIZE",
         choices=["1K", "2K", "4K"],
-        help="Image size (default: 1K)",
+        help="Resolution: 1K, 2K, 4K (default: 1K)",
     )
 
     args = parser.parse_args()
-    generate_image(
-        prompt=args.prompt,
-        output=args.output,
-        aspect_ratio=args.aspect_ratio,
-        size=args.size,
-    )
+
+    if args.edit:
+        edit_image(
+            input_path=args.edit,
+            prompt=args.prompt,
+            output=args.output,
+            size=args.size,
+        )
+    else:
+        generate_image(
+            prompt=args.prompt,
+            output=args.output,
+            aspect_ratio=args.aspect_ratio,
+            size=args.size,
+        )
 
 
 if __name__ == "__main__":

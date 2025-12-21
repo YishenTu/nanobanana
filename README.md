@@ -2,7 +2,7 @@
 
 ![banana](banana.png)
 
-CLI tool for generating images using Google's Gemini 3 Pro image generation model.
+CLI tool for generating and editing images using Google's Gemini 3 Pro image generation model.
 
 ## Setup
 
@@ -21,11 +21,14 @@ GEMINI_API_KEY=your-api-key-here
 ## Usage
 
 ```bash
-# Basic usage
-uv run nbp "a cute banana wearing sunglasses"
+# Generate a new image
+nbp "a cute banana wearing sunglasses"
 
 # With options
-uv run nbp "a futuristic city at sunset" -a 16:9 -s 2K -o city.png
+nbp "a futuristic city at sunset" -a 16:9 -s 2K -o city.png
+
+# Edit an existing image
+nbp "add a hat and sunglasses" -e input.png -o output.png
 ```
 
 ## Options
@@ -35,13 +38,14 @@ uv run nbp "a futuristic city at sunset" -a 16:9 -s 2K -o city.png
 | `-o, --output` | Output file path | `nbp_TIMESTAMP.png` |
 | `-a, --aspect-ratio` | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `21:9`, `9:21` | `1:1` |
 | `-s, --size` | `1K`, `2K`, `4K` | `1K` |
+| `-e, --edit` | Edit an existing image (provide input path) | - |
 
 ## Global Installation
 
 Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
 
 ```bash
-alias nbp='uv run --project /path/to/nanobananapro nbp'
+alias nbp='uv run --project /path/to/project nbp'
 ```
 
 Then use from anywhere:
