@@ -2,13 +2,19 @@
 name = "nbp-cli"
 version = "0.1.0"
 description = "Nano Banana Pro - CLI for Gemini image generation"
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
+authors = [{ name = "Yishen Tu" }]
+keywords = ["nanobanana-pro", "gemini", "image-generation", "cli", "ai", "google"]
 dependencies = [
     "google-genai>=1.56.0",
     "pillow>=12.0.0",
     "python-dotenv>=1.2.1",
 ]
+
+[project.urls]
+Repository = "https://github.com/YishenTu/nbp-cli"
 
 [project.scripts]
 nbp = "nbp:main"
