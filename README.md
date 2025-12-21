@@ -54,6 +54,14 @@ cp .env.example .env  # Add your GEMINI_API_KEY
 uv run nbp "test prompt"
 ```
 
+## Global Access
+
+For global access, add to your shell profile (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+alias nbp='uv run --project /path/to/nbp-cli nbp'
+```
+
 ## Claude Code Skill
 
 To use NBP as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills), copy the skill to your skills directory:
@@ -62,4 +70,4 @@ To use NBP as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-an
 cp -r skills/nanobanana-pro ~/.claude/skills/
 ```
 
-Claude will automatically use this skill when you ask it to generate or edit images.
+Claude will automatically use this skill when you ask it to generate or edit images. Requires Global Access(alias setup) to work.
