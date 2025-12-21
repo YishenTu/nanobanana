@@ -1,0 +1,16 @@
+[project]
+name = "nbp-cli"
+version = "0.1.0"
+description = "Nano Banana Pro - CLI for Gemini image generation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=1.56.0",
+    "python-dotenv>=1.2.1",
+]
+
+[project.scripts]
+nbp = "nbp:main"
+
+[tool.setuptools]
+py-modules = ["nbp"]
