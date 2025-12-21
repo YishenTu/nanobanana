@@ -25,10 +25,13 @@ GEMINI_API_KEY=your-api-key-here
 nbp "a cute banana wearing sunglasses"
 
 # With options
-nbp "a futuristic city at sunset" -a 16:9 -s 2K -o city.png
+nbp "a futuristic city at sunset" -a 16:9 -r 2K -o city.png
 
 # Edit an existing image
 nbp "add a hat and sunglasses" -e input.png -o output.png
+
+# Use Google Search grounding for real-time info
+nbp "visualize today's weather in Tokyo" -s
 ```
 
 ## Options
@@ -36,9 +39,10 @@ nbp "add a hat and sunglasses" -e input.png -o output.png
 | Flag | Description | Default |
 |------|-------------|---------|
 | `-o, --output` | Output file path | `nbp_TIMESTAMP.png` |
-| `-a, --aspect-ratio` | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `21:9`, `9:21` | `1:1` |
-| `-s, --size` | `1K`, `2K`, `4K` | `1K` |
+| `-a, --aspect-ratio` | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9` | `1:1` |
+| `-r, --resolution` | `1K`, `2K`, `4K` | `1K` |
 | `-e, --edit` | Edit an existing image (provide input path) | - |
+| `-s, --search` | Use Google Search grounding (prompt should ask to "visualize") | - |
 
 ## Global Installation
 

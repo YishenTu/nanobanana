@@ -50,20 +50,26 @@ def generate_image(
     output: str | None = None,
     aspect_ratio: str = "1:1",
     size: str = "1K",
+    grounded: bool = False,
 ) -> str:
     """Generate an image using Gemini and save it."""
     client = get_client()
 
+    config_kwargs = {
+        "response_modalities": ["Image"] if not grounded else ["Text", "Image"],
+        "image_config": types.ImageConfig(
+            aspect_ratio=aspect_ratio,
+            image_size=size,
+        ),
+    }
+
+    if grounded:
+        config_kwargs["tools"] = [{"google_search": {}}]
+
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
         contents=prompt,
-        config=types.GenerateContentConfig(
-            response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(
-                aspect_ratio=aspect_ratio,
-                image_size=size,
-            ),
-        ),
+        config=types.GenerateContentConfig(**config_kwargs),
     )
 
     return save_image(response, output)
@@ -104,8 +110,9 @@ def main():
 Examples:
   nbp "a cat wearing a hat"                  Generate new image
   nbp "sunset over mountains" -a 16:9        Widescreen landscape
-  nbp "portrait photo" -s 4K -o portrait.png High-res with custom output
+  nbp "portrait photo" -r 4K -o portrait.png High-res with custom output
   nbp "add sunglasses" -e photo.png          Edit existing image
+  nbp "visualize today's weather in NYC" -s  Use Google Search grounding
         """,
     )
     parser.add_argument(
@@ -126,15 +133,20 @@ Examples:
         "-a", "--aspect-ratio",
         default="1:1",
         metavar="RATIO",
-        choices=["1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "9:21"],
-        help="Aspect ratio: 1:1, 16:9, 9:16, 4:3, 3:4 (default: 1:1)",
+        choices=["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"],
+        help="Aspect ratio (default: 1:1)",
     )
     parser.add_argument(
-        "-s", "--size",
+        "-r", "--resolution",
         default="1K",
-        metavar="SIZE",
+        metavar="RES",
         choices=["1K", "2K", "4K"],
         help="Resolution: 1K, 2K, 4K (default: 1K)",
+    )
+    parser.add_argument(
+        "-s", "--search",
+        action="store_true",
+        help="Use Google Search grounding (prompt should ask to 'visualize')",
     )
 
     args = parser.parse_args()
@@ -144,14 +156,15 @@ Examples:
             input_path=args.edit,
             prompt=args.prompt,
             output=args.output,
-            size=args.size,
+            size=args.resolution,
         )
     else:
         generate_image(
             prompt=args.prompt,
             output=args.output,
             aspect_ratio=args.aspect_ratio,
-            size=args.size,
+            size=args.resolution,
+            grounded=args.search,
         )
 
 
