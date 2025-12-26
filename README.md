@@ -32,6 +32,10 @@ nbp "add a hat and sunglasses" -e input.png -o output.png
 
 # Use Google Search grounding for real-time info
 nbp "visualize today's weather in Tokyo" -s
+
+# Use reference images for style or content guidance
+nbp "a cute cat in this style" --reference style_image.png -o cat.png
+nbp "a mix of these people" -ref person1.png person2.png
 ```
 
 ## Options
@@ -42,6 +46,7 @@ nbp "visualize today's weather in Tokyo" -s
 | `-a, --aspect-ratio` | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9` | `1:1` |
 | `-r, --resolution` | `1K`, `2K`, `4K` | `1K` |
 | `-e, --edit` | Edit an existing image (provide input path) | - |
+| `-ref, --reference` | One or more reference images to guide generation | - |
 | `-s, --search` | Use Google Search grounding (prompt should ask to "visualize") | - |
 
 ## Development

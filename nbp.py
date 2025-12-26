@@ -28,7 +28,10 @@ def get_client() -> genai.Client:
 
 def save_image(response, output: str | None) -> str:
     """Extract and save image from response."""
+    output_path = ""
     for part in response.candidates[0].content.parts:
+        if part.text:
+            print(f"Gemini: {part.text}")
         if part.inline_data is not None:
             if output:
                 output_path = output
@@ -41,8 +44,10 @@ def save_image(response, output: str | None) -> str:
             print(f"Image saved to: {output_path}")
             return output_path
 
-    print("Error: No image was generated.", file=sys.stderr)
-    sys.exit(1)
+    if not output_path:
+        print("Error: No image was generated.", file=sys.stderr)
+        sys.exit(1)
+    return output_path
 
 
 def generate_image(
@@ -51,12 +56,18 @@ def generate_image(
     aspect_ratio: str = "1:1",
     size: str = "1K",
     grounded: bool = False,
+    references: list[str] | None = None,
 ) -> str:
     """Generate an image using Gemini and save it."""
     client = get_client()
 
+    contents = [prompt]
+    if references:
+        for ref_path in references:
+            contents.append(Image.open(ref_path))
+
     config_kwargs = {
-        "response_modalities": ["Image"] if not grounded else ["Text", "Image"],
+        "response_modalities": ["TEXT", "IMAGE"],
         "image_config": types.ImageConfig(
             aspect_ratio=aspect_ratio,
             image_size=size,
@@ -68,7 +79,7 @@ def generate_image(
 
     response = client.models.generate_content(
         model="gemini-3-pro-image-preview",
-        contents=prompt,
+        contents=contents,
         config=types.GenerateContentConfig(**config_kwargs),
     )
 
@@ -91,7 +102,7 @@ def edit_image(
         model="gemini-3-pro-image-preview",
         contents=[input_image, prompt],
         config=types.GenerateContentConfig(
-            response_modalities=["IMAGE"],
+            response_modalities=["TEXT", "IMAGE"],
             image_config=types.ImageConfig(
                 image_size=size,
             ),
@@ -113,6 +124,7 @@ Examples:
   nbp "portrait photo" -r 4K -o portrait.png High-res with custom output
   nbp "add sunglasses" -e photo.png          Edit existing image
   nbp "visualize today's weather in NYC" -s  Use Google Search grounding
+  nbp "a cat in this style" --reference s.png Use reference image
         """,
     )
     parser.add_argument(
@@ -123,6 +135,12 @@ Examples:
         "-e", "--edit",
         metavar="FILE",
         help="Edit existing image instead of generating new",
+    )
+    parser.add_argument(
+        "-ref", "--reference",
+        nargs="+",
+        metavar="FILE",
+        help="One or more reference images to guide generation",
     )
     parser.add_argument(
         "-o", "--output",
@@ -165,6 +183,7 @@ Examples:
             aspect_ratio=args.aspect_ratio,
             size=args.resolution,
             grounded=args.search,
+            references=args.reference,
         )
 
 
