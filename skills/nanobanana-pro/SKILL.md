@@ -12,6 +12,7 @@ NanoBanana Pro (NBP) is a CLI tool for generating and editing images using Googl
 - User requests image generation
 - User wants to create visual content from text prompts
 - User wants to edit or modify an existing image
+- User wants to use reference images for style or content guidance
 - User mentions "nbp", "nano banana pro", or image generation
 - User specifies image parameters like aspect ratio or resolution
 - User wants to visualize real-time info (weather, stocks, current events)
@@ -28,6 +29,11 @@ zsh -i -c 'nbp "your prompt here" [options]'
 zsh -i -c 'nbp "edit instruction" -e /path/to/input.png -o output.png'
 ```
 
+### Generate with reference images
+```bash
+zsh -i -c 'nbp "your prompt" --reference ref1.png [ref2.png ...] -o output.png'
+```
+
 ## Options
 
 | Flag | Description | Choices | Default |
@@ -36,6 +42,7 @@ zsh -i -c 'nbp "edit instruction" -e /path/to/input.png -o output.png'
 | `-a, --aspect-ratio` | Image aspect ratio (new images only) | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9` | `1:1` |
 | `-r, --resolution` | Image resolution | `1K`, `2K`, `4K` | `1K` |
 | `-e, --edit` | Edit existing image (provide input path) | Any image path | - |
+| `-ref, --reference` | One or more reference images to guide generation | Any image path(s) | - |
 | `-s, --search` | Use Google Search grounding for real-time info | - | off |
 
 ## Examples
@@ -70,6 +77,16 @@ zsh -i -c 'nbp "add sunglasses and a hat" -e /path/to/photo.png -o edited.png'
 zsh -i -c 'nbp "change background to a beach scene" -e input.png -o beach_version.png'
 ```
 
+### Use reference images for style guidance
+```bash
+zsh -i -c 'nbp "a cute cat in this style" --reference style_image.png -o cat.png'
+```
+
+### Use multiple reference images
+```bash
+zsh -i -c 'nbp "a mix of these people" -ref person1.png person2.png -o merged.png'
+```
+
 ### Google Search grounding (real-time info)
 ```bash
 zsh -i -c 'nbp "visualize today'\''s weather in Tokyo" -s'
@@ -94,6 +111,7 @@ zsh -i -c 'nbp "visualize the current stock price of AAPL as a chart" -s -a 16:9
 4. Specify camera angle or perspective if needed
 5. For edits, be clear about what to change vs. preserve
 6. For `-s` search mode, start prompt with "visualize" (e.g., "visualize today's weather...")
+7. For reference images, describe how you want the reference used (e.g., "in this style", "similar to this")
 
 ## Requirements
 
