@@ -19,19 +19,25 @@ NanoBanana Pro (NBP) is a CLI tool for generating and editing images using Googl
 
 ## Command syntax
 
+The script is bundled at `scripts/nbp.py` relative to this skill directory. Find the skill location:
+- Global: `~/.claude/skills/nanobanana-pro/scripts/nbp.py`
+- Project: `.claude/skills/nanobanana-pro/scripts/nbp.py`
+
+Run with `python3` (dependencies auto-install on first run):
+
 ### Generate new image
 ```bash
-zsh -i -c 'nbp "your prompt here" [options]'
+python3 <skill_dir>/scripts/nbp.py "your prompt here" [options]
 ```
 
 ### Edit existing image
 ```bash
-zsh -i -c 'nbp "edit instruction" -e /path/to/input.png -o output.png'
+python3 <skill_dir>/scripts/nbp.py "edit instruction" -e /path/to/input.png -o output.png
 ```
 
 ### Generate with reference images
 ```bash
-zsh -i -c 'nbp "your prompt" --reference ref1.png [ref2.png ...] -o output.png'
+python3 <skill_dir>/scripts/nbp.py "your prompt" --reference ref1.png [ref2.png ...] -o output.png
 ```
 
 ## Options
@@ -49,52 +55,52 @@ zsh -i -c 'nbp "your prompt" --reference ref1.png [ref2.png ...] -o output.png'
 
 ### Basic image generation
 ```bash
-zsh -i -c 'nbp "a cute cat sitting on a windowsill"'
+python3 <skill_dir>/scripts/nbp.py "a cute cat sitting on a windowsill"
 ```
 
 ### Widescreen landscape
 ```bash
-zsh -i -c 'nbp "a beautiful mountain landscape at sunset" -a 16:9 -r 2K -o landscape.png'
+python3 <skill_dir>/scripts/nbp.py "a beautiful mountain landscape at sunset" -a 16:9 -r 2K -o landscape.png
 ```
 
 ### Portrait image
 ```bash
-zsh -i -c 'nbp "professional headshot portrait, studio lighting" -a 9:16 -o portrait.png'
+python3 <skill_dir>/scripts/nbp.py "professional headshot portrait, studio lighting" -a 9:16 -o portrait.png
 ```
 
 ### High resolution
 ```bash
-zsh -i -c 'nbp "detailed cyberpunk cityscape" -r 4K -o cityscape.png'
+python3 <skill_dir>/scripts/nbp.py "detailed cyberpunk cityscape" -r 4K -o cityscape.png
 ```
 
 ### Edit an existing image
 ```bash
-zsh -i -c 'nbp "add sunglasses and a hat" -e /path/to/photo.png -o edited.png'
+python3 <skill_dir>/scripts/nbp.py "add sunglasses and a hat" -e /path/to/photo.png -o edited.png
 ```
 
 ### Change background of image
 ```bash
-zsh -i -c 'nbp "change background to a beach scene" -e input.png -o beach_version.png'
+python3 <skill_dir>/scripts/nbp.py "change background to a beach scene" -e input.png -o beach_version.png
 ```
 
 ### Use reference images for style guidance
 ```bash
-zsh -i -c 'nbp "a cute cat in this style" --reference style_image.png -o cat.png'
+python3 <skill_dir>/scripts/nbp.py "a cute cat in this style" --reference style_image.png -o cat.png
 ```
 
 ### Use multiple reference images
 ```bash
-zsh -i -c 'nbp "a mix of these people" -ref person1.png person2.png -o merged.png'
+python3 <skill_dir>/scripts/nbp.py "a mix of these people" -ref person1.png person2.png -o merged.png
 ```
 
 ### Google Search grounding (real-time info)
 ```bash
-zsh -i -c 'nbp "visualize today'\''s weather in Tokyo" -s'
+python3 <skill_dir>/scripts/nbp.py "visualize today's weather in Tokyo" -s
 ```
 
 ### Search grounding with options
 ```bash
-zsh -i -c 'nbp "visualize the current stock price of AAPL as a chart" -s -a 16:9 -o aapl.png'
+python3 <skill_dir>/scripts/nbp.py "visualize the current stock price of AAPL as a chart" -s -a 16:9 -o aapl.png
 ```
 
 ## Output
@@ -112,8 +118,4 @@ zsh -i -c 'nbp "visualize the current stock price of AAPL as a chart" -s -a 16:9
 5. For edits, be clear about what to change vs. preserve
 6. For `-s` search mode, start prompt with "visualize" (e.g., "visualize today's weather...")
 7. For reference images, describe how you want the reference used (e.g., "in this style", "similar to this")
-
-## Requirements
-
-- `GEMINI_API_KEY` environment variable must be set
-- Get your API key at: https://aistudio.google.com/apikey
+8. For multiple images generation/editing, spawn multiple threads to generate/edit images in parallel

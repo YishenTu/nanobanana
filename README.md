@@ -69,10 +69,18 @@ alias nbp='uv run --project /path/to/nbp-cli nbp'
 
 ## Claude Code Skill
 
-To use NBP as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills), copy the skill to your skills directory:
+The skill is fully self-contained. Just copy and set API key!
 
-```bash
-cp -r skills/nanobanana-pro ~/.claude/skills/
-```
+**Requirements:** Python 3.12+ (pre-installed on most systems)
 
-Claude will automatically use this skill when you ask it to generate or edit images. Requires Global Access(alias setup) to work.
+1. Copy the skill folder:
+   ```bash
+   cp -r skills/nanobanana-pro ~/.claude/skills/
+   ```
+
+2. Set your API key in `~/.zshrc` or `~/.bashrc`:
+   ```bash
+   export GEMINI_API_KEY="your-api-key-here"
+   ```
+
+That's it! Claude will automatically use this skill when you ask it to generate or edit images. Python dependencies auto-install on first run.

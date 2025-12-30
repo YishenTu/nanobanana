@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+"""Nano Banana Pro - CLI for Gemini image generation."""
+
+import subprocess
+import sys
+
+# Auto-install dependencies if missing
+def _ensure_deps():
+    required = [("google.genai", "google-genai"), ("PIL", "pillow")]
+    missing = []
+    for module, package in required:
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+    if missing:
+        print(f"Installing dependencies: {', '.join(missing)}")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "-q", *missing])
+
+_ensure_deps()
+
+import argparse
+import os
+from datetime import datetime
+
+from google import genai
+from google.genai import types
+from PIL import Image
+
+
+def get_client() -> genai.Client:
+    """Get authenticated Gemini client."""
+    if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("GOOGLE_API_KEY"):
+        print("Error: GEMINI_API_KEY environment variable not set.", file=sys.stderr)
+        print("Get your API key at: https://aistudio.google.com/apikey", file=sys.stderr)
+        sys.exit(1)
+    return genai.Client()
+
+
+def save_image(response, output: str | None) -> str:
+    """Extract and save image from response."""
+    output_path = ""
+    for part in response.candidates[0].content.parts:
+        if part.text:
+            print(f"Gemini: {part.text}")
+        if part.inline_data is not None:
+            if output:
+                output_path = output
+            else:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_path = f"nbp_{timestamp}.png"
+
+            image = part.as_image()
+            image.save(output_path)
+            print(f"Image saved to: {output_path}")
+            return output_path
+
+    if not output_path:
+        print("Error: No image was generated.", file=sys.stderr)
+        sys.exit(1)
+    return output_path
+
+
+def generate_image(
+    prompt: str,
+    output: str | None = None,
+    aspect_ratio: str = "1:1",
+    size: str = "1K",
+    grounded: bool = False,
+    references: list[str] | None = None,
+) -> str:
+    """Generate an image using Gemini and save it."""
+    client = get_client()
+
+    contents = [prompt]
+    if references:
+        for ref_path in references:
+            contents.append(Image.open(ref_path))
+
+    config_kwargs = {
+        "response_modalities": ["TEXT", "IMAGE"],
+        "image_config": types.ImageConfig(
+            aspect_ratio=aspect_ratio,
+            image_size=size,
+        ),
+    }
+
+    if grounded:
+        config_kwargs["tools"] = [{"google_search": {}}]
+
+    response = client.models.generate_content(
+        model="gemini-3-pro-image-preview",
+        contents=contents,
+        config=types.GenerateContentConfig(**config_kwargs),
+    )
+
+    return save_image(response, output)
+
+
+def edit_image(
+    input_path: str,
+    prompt: str,
+    output: str | None = None,
+    size: str = "1K",
+) -> str:
+    """Edit an existing image using Gemini."""
+    client = get_client()
+
+    input_image = Image.open(input_path)
+
+    response = client.models.generate_content(
+        model="gemini-3-pro-image-preview",
+        contents=[input_image, prompt],
+        config=types.GenerateContentConfig(
+            response_modalities=["TEXT", "IMAGE"],
+            image_config=types.ImageConfig(
+                image_size=size,
+            ),
+        ),
+    )
+
+    return save_image(response, output)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog="nbp",
+        description="Nano Banana Pro - Generate and edit images with Gemini 3 Pro",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  nbp "a cat wearing a hat"                  Generate new image
+  nbp "sunset over mountains" -a 16:9        Widescreen landscape
+  nbp "portrait photo" -r 4K -o portrait.png High-res with custom output
+  nbp "add sunglasses" -e photo.png          Edit existing image
+  nbp "visualize today's weather in NYC" -s  Use Google Search grounding
+  nbp "a cat in this style" --reference s.png Use reference image
+        """,
+    )
+    parser.add_argument(
+        "prompt",
+        help="Text prompt for generation or edit instruction",
+    )
+    parser.add_argument(
+        "-e", "--edit",
+        metavar="FILE",
+        help="Edit existing image instead of generating new",
+    )
+    parser.add_argument(
+        "-ref", "--reference",
+        nargs="+",
+        metavar="FILE",
+        help="One or more reference images to guide generation",
+    )
+    parser.add_argument(
+        "-o", "--output",
+        metavar="FILE",
+        help="Output path (default: nbp_TIMESTAMP.png)",
+    )
+    parser.add_argument(
+        "-a", "--aspect-ratio",
+        default="1:1",
+        metavar="RATIO",
+        choices=["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"],
+        help="Aspect ratio (default: 1:1)",
+    )
+    parser.add_argument(
+        "-r", "--resolution",
+        default="1K",
+        metavar="RES",
+        choices=["1K", "2K", "4K"],
+        help="Resolution: 1K, 2K, 4K (default: 1K)",
+    )
+    parser.add_argument(
+        "-s", "--search",
+        action="store_true",
+        help="Use Google Search grounding (prompt should ask to 'visualize')",
+    )
+
+    args = parser.parse_args()
+
+    if args.edit:
+        edit_image(
+            input_path=args.edit,
+            prompt=args.prompt,
+            output=args.output,
+            size=args.resolution,
+        )
+    else:
+        generate_image(
+            prompt=args.prompt,
+            output=args.output,
+            aspect_ratio=args.aspect_ratio,
+            size=args.resolution,
+            grounded=args.search,
+            references=args.reference,
+        )
+
+
+if __name__ == "__main__":
+    main()
