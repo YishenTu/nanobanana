@@ -1,5 +1,5 @@
 [project]
-name = "nanobanana"
+name = "bananagen"
 version = "0.2.0"
 description = "Nano Banana Pro - CLI for Gemini image generation"
 license = "MIT"
