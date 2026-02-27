@@ -1,12 +1,12 @@
 [project]
 name = "bananagen"
 version = "0.2.0"
-description = "Nano Banana Pro - CLI for Gemini image generation"
+description = "CLI for Gemini image generation"
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{ name = "Yishen Tu" }]
-keywords = ["nanobanana-pro", "gemini", "image-generation", "cli", "ai", "google"]
+keywords = ["bananagen", "nanobanana", "gemini", "image-generation", "cli", "ai", "google"]
 dependencies = [
     "google-genai>=1.65.0",
     "pillow>=12.1.1",
