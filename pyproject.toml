@@ -19,5 +19,8 @@ Repository = "https://github.com/YishenTu/nanobanana"
 [project.scripts]
 nanobanana = "nanobanana:main"
 
+[tool.uv]
+package = true
+
 [tool.setuptools]
 py-modules = ["nanobanana"]

@@ -27,7 +27,7 @@ wheels = [
 [[package]]
 name = "bananagen"
 version = "0.2.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "google-genai" },
     { name = "pillow" },
