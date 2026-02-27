@@ -45,10 +45,10 @@ python3 <skill_dir>/scripts/nanobanana.py "your prompt" --reference ref1.png [re
 | Flag | Description | Choices | Default |
 |------|-------------|---------|---------|
 | `-o, --output` | Output file path | Any path | `nanobanana_TIMESTAMP.png` |
-| `-a, --aspect-ratio` | Image aspect ratio (new images only) | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `1:4`, `4:1`, `1:8`, `8:1` | `1:1` |
+| `-a, --aspect-ratio` | Image aspect ratio (generation and edit) | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `1:4`, `4:1`, `1:8`, `8:1` | Generate: `1:1`; Edit: keep input ratio |
 | `-r, --resolution` | Image resolution | `0.5K`, `1K`, `2K`, `4K` | `1K` |
 | `-e, --edit` | Edit existing image (provide input path) | Any image path | - |
-| `-ref, --reference` | One or more reference images to guide generation | Any image path(s) | - |
+| `-ref, --reference` | One or more reference images to guide generation (max 14 total; high-fidelity may drop above 10 on Flash / 6 on Pro) | Any image path(s) | - |
 | `-s, --search` | Use Google Search grounding for real-time info | - | off |
 | `-i, --image-search` | Use Google Image Search grounding (3.1 Flash only) | - | off |
 | `-p, --pro` | Use Gemini 3 Pro model instead of 3.1 Flash | - | off |
@@ -84,6 +84,11 @@ python3 <skill_dir>/scripts/nanobanana.py "add sunglasses and a hat" -e /path/to
 ### Change background of image
 ```bash
 python3 <skill_dir>/scripts/nanobanana.py "change background to a beach scene" -e input.png -o beach_version.png
+```
+
+### Edit with grounding, references, and style controls
+```bash
+python3 <skill_dir>/scripts/nanobanana.py "turn this into a retro travel poster" -e input.png -ref style.png -s -a 16:9 -t high -o poster.png
 ```
 
 ### Use reference images for style guidance

@@ -30,6 +30,9 @@ nanobanana "a futuristic city at sunset" -a 16:9 -r 2K -o city.png
 # Edit an existing image
 nanobanana "add a hat and sunglasses" -e input.png -o output.png
 
+# Edit with grounding, references, aspect ratio, and thinking
+nanobanana "turn this into a retro travel poster" -e input.png -ref style.png -s -a 16:9 -t high -o poster.png
+
 # Use Google Search grounding for real-time info
 nanobanana "visualize today's weather in Tokyo" -s
 
@@ -52,10 +55,10 @@ nanobanana "a dog flying a kite" -p
 | Flag | Description | Default |
 |------|-------------|---------|
 | `-o, --output` | Output file path | `nanobanana_TIMESTAMP.png` |
-| `-a, --aspect-ratio` | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `1:4`, `4:1`, `1:8`, `8:1` | `1:1` |
+| `-a, --aspect-ratio` | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `1:4`, `4:1`, `1:8`, `8:1` | Generate: `1:1`; Edit: keep input ratio |
 | `-r, --resolution` | `0.5K`, `1K`, `2K`, `4K` | `1K` |
 | `-e, --edit` | Edit an existing image (provide input path) | - |
-| `-ref, --reference` | One or more reference images to guide generation | - |
+| `-ref, --reference` | One or more reference images to guide generation (max 14 total; high-fidelity may drop above 10 on Flash / 6 on Pro) | - |
 | `-s, --search` | Use Google Search grounding | - |
 | `-i, --image-search` | Use Google Image Search grounding | - |
 | `-p, --pro` | Use the Gemini 3 Pro model instead of 3.1 Flash | - |
