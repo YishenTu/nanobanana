@@ -2,6 +2,7 @@
 """Nano Banana Pro - CLI for Gemini image generation."""
 
 import argparse
+import io
 import os
 import sys
 from datetime import datetime
@@ -136,9 +137,33 @@ def finish_reasons(response) -> list[str]:
     return reasons
 
 
+_EXT_TO_PIL_FORMAT = {
+    ".png": "PNG",
+    ".jpg": "JPEG",
+    ".jpeg": "JPEG",
+    ".webp": "WEBP",
+    ".gif": "GIF",
+    ".bmp": "BMP",
+    ".tiff": "TIFF",
+    ".tif": "TIFF",
+}
+
+_MIME_TO_EXT = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/webp": ".webp",
+    "image/gif": ".gif",
+}
+
+
 def save_image(response, output: str | None) -> str:
-    """Extract and save image from response."""
-    output_path = output or f"nanobanana_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    """Extract and save image from response.
+
+    Honors the user's chosen extension by re-encoding to the matching format
+    (so e.g. ``-o foo.png`` always yields a real PNG, even if the model
+    returned JPEG bytes). When no output path is given, the auto-generated
+    filename uses the source mime-type's natural extension.
+    """
     saw_parts = False
 
     for part in iter_response_parts(response):
@@ -150,14 +175,32 @@ def save_image(response, output: str | None) -> str:
         if getattr(part, "thought", False):
             continue
 
-        if getattr(part, "inline_data", None) is not None:
+        inline_data = getattr(part, "inline_data", None)
+        if inline_data is not None and getattr(inline_data, "data", None):
+            mime = getattr(inline_data, "mime_type", None) or "image/png"
+            source_ext = _MIME_TO_EXT.get(mime, ".png")
+
+            if output:
+                output_path = output
+                ext = os.path.splitext(output_path)[1].lower()
+                pil_format = _EXT_TO_PIL_FORMAT.get(ext)
+            else:
+                output_path = f"nanobanana_{datetime.now().strftime('%Y%m%d_%H%M%S')}{source_ext}"
+                pil_format = _EXT_TO_PIL_FORMAT.get(source_ext)
+
             try:
-                image = part.as_image()
+                pil_image = Image.open(io.BytesIO(inline_data.data))
+                pil_image.load()
             except Exception as exc:
                 print(f"Warning: Failed to decode image output: {exc}", file=sys.stderr)
                 continue
 
-            image.save(output_path)
+            # JPEG cannot store an alpha channel; flatten if needed.
+            if pil_format == "JPEG" and pil_image.mode in ("RGBA", "LA", "P"):
+                pil_image = pil_image.convert("RGB")
+
+            save_kwargs = {"format": pil_format} if pil_format else {}
+            pil_image.save(output_path, **save_kwargs)
             print(f"Image saved to: {output_path}")
             return output_path
 
