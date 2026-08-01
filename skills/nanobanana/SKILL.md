@@ -16,8 +16,10 @@ CLI tool for generating and editing images using Google's Gemini 3.1 Flash and G
 
 ## Command
 
+Run the bundled command, resolving `scripts/nanobanana` relative to this skill directory:
+
 ```bash
-nanobanana "prompt" [options]
+scripts/nanobanana "prompt" [options]
 ```
 
 ## Options
@@ -38,22 +40,22 @@ nanobanana "prompt" [options]
 
 ```bash
 # Generate
-nanobanana "a cute cat sitting on a windowsill"
-nanobanana "mountain landscape at sunset" -a 16:9 -r 2K -o landscape.png
-nanobanana "cyberpunk cityscape" -r 4K -p -o cityscape.png
+scripts/nanobanana "a cute cat sitting on a windowsill"
+scripts/nanobanana "mountain landscape at sunset" -a 16:9 -r 2K -o landscape.png
+scripts/nanobanana "cyberpunk cityscape" -r 4K -p -o cityscape.png
 
 # Edit
-nanobanana "add sunglasses and a hat" -e photo.png -o edited.png
-nanobanana "change background to beach" -e input.png -o beach.png
+scripts/nanobanana "add sunglasses and a hat" -e photo.png -o edited.png
+scripts/nanobanana "change background to beach" -e input.png -o beach.png
 
 # Reference images
-nanobanana "a cute cat in this style" -ref style.png -o cat.png
+scripts/nanobanana "a cute cat in this style" -ref style.png -o cat.png
 
 # Search grounding (real-time info)
-nanobanana "visualize today's weather in Tokyo" -s
+scripts/nanobanana "visualize today's weather in Tokyo" -s
 
 # Complex: edit with grounding, reference, and style
-nanobanana "turn this into a retro travel poster" -e input.png -ref style.png -s -a 16:9 -t high -o poster.png
+scripts/nanobanana "turn this into a retro travel poster" -e input.png -ref style.png -s -a 16:9 -t high -o poster.png
 ```
 
 ## Tips

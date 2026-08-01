@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+search_dir=$script_dir
+
+while :; do
+  if [ -x "$search_dir/.venv/bin/python" ]; then
+    exec "$search_dir/.venv/bin/python" "$script_dir/nanobanana.py" "$@"
+  fi
+
+  parent_dir=$(dirname -- "$search_dir")
+  [ "$parent_dir" = "$search_dir" ] && break
+  search_dir=$parent_dir
+done
+
+exec "${PYTHON:-python3}" "$script_dir/nanobanana.py" "$@"

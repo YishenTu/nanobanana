@@ -50,7 +50,8 @@ def build_config(
     thinking_level: str | None,
 ) -> types.GenerateContentConfig:
     """Build shared generation config for both generate and edit flows."""
-    image_config_kwargs = {"image_size": size}
+    # The CLI exposes the friendly 0.5K label; the API expects 512 pixels.
+    image_config_kwargs = {"image_size": "512" if size == "0.5K" else size}
     if aspect_ratio:
         image_config_kwargs["aspect_ratio"] = aspect_ratio
 

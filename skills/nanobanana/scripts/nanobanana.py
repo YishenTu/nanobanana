@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
 """NanoBanana - CLI for Gemini image generation."""
 
+import argparse
+import importlib.util
+import io
+import os
+import shutil
 import subprocess
 import sys
+from datetime import datetime
+from pathlib import Path
 
 # Auto-install dependencies if missing
 def _ensure_deps():
-    required = [("google.genai", "google-genai"), ("PIL", "pillow")]
+    required = [
+        ("google.genai", "google-genai"),
+        ("PIL", "pillow"),
+        ("dotenv", "python-dotenv"),
+    ]
     missing = []
     for module, package in required:
         try:
@@ -15,18 +26,36 @@ def _ensure_deps():
             missing.append(package)
     if missing:
         print(f"Installing dependencies: {', '.join(missing)}")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "-q", *missing])
+        if importlib.util.find_spec("pip") is None:
+            if not shutil.which("uv"):
+                raise RuntimeError("Missing pip and uv; cannot install dependencies")
+            install_command = ["uv", "pip", "install", "--python", sys.executable]
+        else:
+            install_command = [sys.executable, "-m", "pip", "install", "-q"]
+            # --user is invalid inside a virtual environment.
+            if sys.prefix == sys.base_prefix:
+                install_command.append("--user")
+        subprocess.check_call([*install_command, *missing])
 
 _ensure_deps()
 
-import argparse
-import io
-import os
-from datetime import datetime
-
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from PIL import Image
+
+
+def _load_environment() -> None:
+    """Load the nearest .env in the current working tree."""
+    for directory in (Path.cwd(), *Path.cwd().parents):
+        env_file = directory / ".env"
+        if env_file.is_file():
+            # Exported values take precedence over values from .env.
+            load_dotenv(env_file, override=False)
+            return
+
+
+_load_environment()
 
 MAX_REFERENCE_IMAGES = 14
 FLASH_HIGH_FIDELITY_REFERENCE_HINT = 10
@@ -61,7 +90,8 @@ def build_config(
     thinking_level: str | None,
 ) -> types.GenerateContentConfig:
     """Build shared generation config for both generate and edit flows."""
-    image_config_kwargs = {"image_size": size}
+    # The CLI exposes the friendly 0.5K label; the API expects 512 pixels.
+    image_config_kwargs = {"image_size": "512" if size == "0.5K" else size}
     if aspect_ratio:
         image_config_kwargs["aspect_ratio"] = aspect_ratio
 
