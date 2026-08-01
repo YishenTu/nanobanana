@@ -64,3 +64,13 @@ scripts/nanobanana "turn this into a retro travel poster" -e input.png -ref styl
 2. For edits, be clear about what to change vs. preserve
 3. For `-s` search mode, start prompt with "visualize"
 4. For multiple images, spawn parallel threads to generate/edit concurrently
+
+## Missing API key
+
+If the command reports that no API key is set, tell the user to create a private `.env` file in this skill directory:
+
+```env
+GEMINI_API_KEY=your-api-key
+```
+
+The command also accepts an inherited `GEMINI_API_KEY` or `GOOGLE_API_KEY`, and a `.env` in the current working tree. Do not ask the user to paste a key in chat or commit the `.env` file. Restrict the file to its owner (`chmod 600 .env`).

@@ -46,12 +46,20 @@ from PIL import Image
 
 
 def _load_environment() -> None:
-    """Load the nearest .env in the current working tree."""
-    for directory in (Path.cwd(), *Path.cwd().parents):
-        env_file = directory / ".env"
-        if env_file.is_file():
-            # Exported values take precedence over values from .env.
-            load_dotenv(env_file, override=False)
+    """Load credentials from the working tree or this skill's private .env."""
+    candidates = [directory / ".env" for directory in (Path.cwd(), *Path.cwd().parents)]
+    candidates.append(Path(__file__).resolve().parent.parent / ".env")
+
+    seen: set[Path] = set()
+    for env_file in candidates:
+        env_file = env_file.resolve()
+        if env_file in seen or not env_file.is_file():
+            continue
+        seen.add(env_file)
+
+        # Exported values take precedence over values from .env.
+        load_dotenv(env_file, override=False)
+        if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
             return
 
 
